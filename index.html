@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #0f172a;
+      color: white;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin: 30px auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.2s;
+    }
+
+    .cell:hover {
+      background: #334155;
+    }
+
+    #status {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .reset {
+      background: red;
+      color: white;
+    }
+
+    .mode {
+      background: green;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🎮 Tic Tac Toe</h1>
+
+  <button class="mode" onclick="toggleMode()">Switch Mode: <span id="modeText">Player vs Player</span></button>
+
+  <div class="board" id="board"></div>
+
+  <div id="status">Player X's Turn</div>
+
+  <button class="reset" onclick="resetGame()">Restart</button>
+
+  <script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let gameActive = true;
+    let vsAI = false;
+
+    const boardEl = document.getElementById("board");
+    const statusText = document.getElementById("status");
+    const modeText = document.getElementById("modeText");
+
+    const winPatterns = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    function createBoard() {
+      boardEl.innerHTML = "";
+      board.forEach((val, index) => {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.innerText = val;
+        cell.addEventListener("click", () => handleClick(index));
+        boardEl.appendChild(cell);
+      });
+    }
+
+    function handleClick(index) {
+      if (board[index] !== "" || !gameActive) return;
+
+      makeMove(index, currentPlayer);
+
+      if (vsAI && gameActive && currentPlayer === "O") {
+        setTimeout(aiMove, 500);
+      }
+    }
+
+    function makeMove(index, player) {
+      board[index] = player;
+      createBoard();
+      checkWinner();
+
+      currentPlayer = player === "X" ? "O" : "X";
+      if (gameActive) {
+        statusText.innerText = `Player ${currentPlayer}'s Turn`;
+      }
+    }
+
+    function aiMove() {
+      let emptyCells = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+      let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      makeMove(randomIndex, "O");
+    }
+
+    function checkWinner() {
+      for (let pattern of winPatterns) {
+        let [a, b, c] = pattern;
+
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          statusText.innerText = `🎉 Player ${board[a]} Wins!`;
+          gameActive = false;
+          return;
+        }
+      }
+
+      if (!board.includes("")) {
+        statusText.innerText = "It's a Draw!";
+        gameActive = false;
+      }
+    }
+
+    function resetGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      gameActive = true;
+      statusText.innerText = "Player X's Turn";
+      createBoard();
+    }
+
+    function toggleMode() {
+      vsAI = !vsAI;
+      modeText.innerText = vsAI ? "Player vs AI" : "Player vs Player";
+      resetGame();
+    }
+
+    createBoard();
+  </script>
+
+</body>
+</html>
